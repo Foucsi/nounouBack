@@ -12,7 +12,55 @@ router.get("/", function (req, res, next) {
   res.send("respond with a resource");
 });
 
-/* permet d'ajouter d'editer un prodil */
+/* permet d'ajouter un prodil */
+router.post("/addProfil/:token", (req, res) => {
+  const token = req.params.token;
+  const profil = req.body.profil;
+  User.findOneAndUpdate(
+    { token },
+    {
+      $push: { profil: { profil } },
+    }
+  )
+    .then((data) => {
+      if (!data) {
+        res.status(404).json({ result: false, error: "User not found!" });
+      }
+      res.json({ result: true, users: data });
+    })
+    .catch((err) => {
+      res.json({ result: false, error: err });
+    });
+});
+
+/*get all profil */
+router.get("/getAllProfil", (req, res) => {
+  User.find().then((data) => {
+    res.json({ result: true, users: data });
+  });
+});
+
+/*permet de modifier son profil */
+
+router.post("/editProfil/:token", (req, res) => {
+  const token = req.params.token;
+  const profil = req.body.profil;
+  User.findOneAndUpdate(
+    { token },
+    {
+      $set: { profil: { profil } },
+    }
+  )
+    .then((data) => {
+      if (!data) {
+        res.status(404).json({ result: false, error: "User not found!" });
+      }
+      res.json({ result: true, users: data });
+    })
+    .catch((err) => {
+      res.json({ result: false, error: err });
+    });
+});
 
 router.post("/signup", (req, res) => {
   if (!checkBody(req.body, ["username", "password"])) {
