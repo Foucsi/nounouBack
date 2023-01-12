@@ -13,56 +13,61 @@ router.get("/", function (req, res, next) {
 });
 
 /* permet d'ajouter un prodil */
-router.post("/addProfil/:token", (req, res) => {
+
+router.post("/addProfil/:token", async (req, res) => {
   const token = req.params.token;
   const profil = req.body.profil;
-  User.findOneAndUpdate(
-    { token },
-    {
-      $push: { profil: { profil } },
-    }
-  )
-    .then((data) => {
-      if (!data) {
-        res.status(404).json({ result: false, error: "User not found!" });
-      }
-      res.json({ result: true, users: data });
-    })
-    .catch((err) => {
-      res.json({ result: false, error: err });
-    });
+  try {
+    const user = await User.findOneAndUpdate(
+      { token },
+      { $push: { profil: { profil } } },
+      { new: true }
+    );
+    user
+      ? res.json({ result: true, user })
+      : res.status(404).json({ result: false, error: "User not found!" });
+  } catch (err) {
+    next(err);
+  }
 });
 
 /*get all profil */
-router.get("/getAllProfil", (req, res) => {
-  User.find().then((data) => {
-    res.json({ result: true, users: data });
-  });
+router.get("/getAllProfil", async (req, res) => {
+  try {
+    const users = await User.find({}); // here you could add some filter or query conditions
+    users.length > 0
+      ? res.json({ result: true, users: users })
+      : res.json({ result: false });
+  } catch (err) {
+    res.json({ result: false, error: err });
+  }
 });
 
 /*permet de modifier son profil */
 
-router.post("/editProfil/:token", (req, res) => {
+router.post("/editProfil/:token", async (req, res) => {
   const token = req.params.token;
   const profil = req.body.profil;
-  User.findOneAndUpdate(
-    { token },
-    {
-      $set: { profil: { profil } },
-    }
-  )
-    .then((data) => {
-      if (!data) {
-        res.status(404).json({ result: false, error: "User not found!" });
-      }
-      res.json({ result: true, users: data });
-    })
-    .catch((err) => {
-      res.json({ result: false, error: err });
-    });
+  try {
+    // Utilisez la méthode findOneAndUpdate de Mongoose pour trouver et mettre à jour l'utilisateur avec le jeton correspondant
+    // L'option { new: true } renvoie l'objet utilisateur mis à jour
+    const user = await User.findOneAndUpdate(
+      { token },
+      { $set: { profil: { profil } } },
+      { new: true }
+    );
+    // Vérifiez si l'utilisateur existe, s'il existe alors retourne l'utilisateur mis à jour avec une réponse de succès, sinon retourne une erreur de non trouvé
+    user
+      ? res.json({ result: true, user })
+      : res.status(404).json({ result: false, error: "User not found!" });
+  } catch (err) {
+    // s'il y a une erreur, appelez la fonction suivante pour gérer l'erreur
+    next(err);
+  }
 });
 
 router.post("/signup", (req, res) => {
+  const { username, email, password, photo } = req.body;
   if (!checkBody(req.body, ["username", "password"])) {
     res.json({ result: false, error: "Missing or empty fields" });
     return;
@@ -70,14 +75,14 @@ router.post("/signup", (req, res) => {
 
   User.findOne({ username: req.body.username }).then((data) => {
     if (data === null) {
-      const hash = bcrypt.hashSync(req.body.password, 10);
+      const hash = bcrypt.hashSync(password, 10);
       const newUser = new User({
-        username: req.body.username,
-        email: req.body.email,
+        username,
+        email,
         password: hash,
         token: uid2(32),
         profil: [],
-        photo: req.body.photo,
+        photo,
       });
 
       newUser.save().then((data) => {
