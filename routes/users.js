@@ -5,6 +5,16 @@ const { checkBody } = require("../modules/checkBody");
 const uid2 = require("uid2");
 const bcrypt = require("bcrypt");
 
+const cloudinary = require("cloudinary").v2;
+const uniqid = require("uniqid");
+const fs = require("fs");
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 const User = require("../models/users");
 
 /* GET users listing. */
@@ -132,6 +142,32 @@ router.get("/getPhoto/:username", (req, res) => {
       res.json({ result: true, data: data.photo });
     }
   });
+});
+
+/* enregistrement sur cloudinary de la photo */
+
+router.post("/upload", async (req, res) => {
+  const photoPath = `./tmp/${uniqid()}.jpg`;
+  console.log("req.file", req.files.userPhoto);
+  const resultMove = await req.files.userPhoto.mv(photoPath);
+  console.log("resultMove", resultMove);
+  if (!resultMove) {
+    const resultCloudinary = await cloudinary.uploader.upload(photoPath);
+    User.findOneAndUpdate(
+      { token: req.params.token },
+      //The $set operator is a MongoDB operator that is used to update specific fields in a document. It replaces the value of a field with the specified value.
+      { $set: { photo: resultCloudinary.secure_url } },
+      //The new: true option is used in MongoDB to specify that the updated document should be returned in the response.
+      { new: true }
+    ).then((updatedUser) => {
+      if (!updatedUser) {
+        res.json({ error: "User not found" });
+      } else {
+        res.json({ result: true, user: updatedUser });
+      }
+    });
+    fs.unlinkSync(photoPath);
+  }
 });
 
 module.exports = router;
