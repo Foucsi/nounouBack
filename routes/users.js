@@ -108,4 +108,30 @@ router.post("/signin", (req, res) => {
   });
 });
 
+/*ajoute une photo de profil */
+router.post("/addPhoto/:token", (req, res) => {
+  const token = req.params.token;
+  const photo = req.body.photo;
+  User.findOneAndUpdate({ token }, { $set: { photo: photo } })
+    .then((data) => {
+      if (!data) {
+        res.status(404).json({ result: false, error: "User note found" });
+      }
+      res.json({ result: true, data: data });
+    })
+    .catch((err) => {
+      res.status(500).json({ result: false, error: err });
+    });
+});
+
+/* recupere la photo en db */
+
+router.get("/getPhoto/:token", (req, res) => {
+  const token = req.params.token;
+  User.findOne({ token }).then((data) => {
+    if (data) {
+      res.json({ result: true, data: data.photo });
+    }
+  });
+});
 module.exports = router;
