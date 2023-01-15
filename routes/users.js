@@ -125,7 +125,6 @@ router.post("/addPhoto/:token", (req, res) => {
 });
 
 /* recupere la photo en db */
-
 router.get("/getPhoto/:token", (req, res) => {
   const token = req.params.token;
   User.findOne({ token }).then((data) => {
@@ -134,4 +133,5 @@ router.get("/getPhoto/:token", (req, res) => {
     }
   });
 });
+
 module.exports = router;
