@@ -125,9 +125,9 @@ router.post("/addPhoto/:token", (req, res) => {
 });
 
 /* recupere la photo en db */
-router.get("/getPhoto/:token", (req, res) => {
-  const token = req.params.token;
-  User.findOne({ token }).then((data) => {
+router.get("/getPhoto/:username", (req, res) => {
+  const username = req.params.username;
+  User.findOne({ username }).then((data) => {
     if (data) {
       res.json({ result: true, data: data.photo });
     }
