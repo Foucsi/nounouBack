@@ -93,6 +93,7 @@ router.post("/signup", (req, res) => {
         token: uid2(32),
         profil: [],
         photo,
+        price: 0,
       });
 
       newUser.save().then((data) => {

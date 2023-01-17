@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema({
   token: String,
   profil: [profilSchema],
   photo: String,
+  price: Number,
 });
 
 const User = mongoose.model("users", userSchema);
