@@ -22,6 +22,39 @@ router.get("/", function (req, res, next) {
   res.send("respond with a resource");
 });
 
+/*recupere les info d'un user avec en parametre son token */
+router.get("/getInfo/:token", async (req, res) => {
+  const token = req.params.token;
+  try {
+    const user = await User.findOne({ token });
+    user
+      ? res.json({ result: true, user })
+      : res.status(404).json({ result: false, error: "User not found!" });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/*route qui mermet de modifier le price */
+router.put("/updatePrice/:token", async (req, res) => {
+  const token = req.params.token;
+  const price = req.body.price;
+  try {
+    const user = await User.findOneAndUpdate(
+      { token },
+      {
+        $set: { price: price },
+      },
+      { new: true }
+    );
+    user
+      ? res.json({ result: true, user })
+      : res.status(404).json({ result: false, error: "User not found" });
+  } catch (err) {
+    next(err);
+  }
+});
+
 /* permet d'ajouter un prodil */
 
 router.post("/addProfil/:token", async (req, res) => {
