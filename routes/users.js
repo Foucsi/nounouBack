@@ -203,4 +203,45 @@ router.put("/upload/:token", async (req, res) => {
   }
 });
 
+/* recuperre le texte du profil*/
+router.get("/getProfil/:token", (req, res) => {
+  const token = req.params.token;
+
+  User.findOne({ token }).then((data) => {
+    const profil = data.profil;
+    res.json({ result: true, data: profil });
+  });
+});
+
+/* ajoute un texte au profil */
+
+router.put("/addProfil/:token", (req, res) => {
+  const token = req.params.token;
+  const profil = req.body.profil;
+
+  User.findOneAndUpdate(
+    { token },
+    { $set: { profil: { profil: profil } } }
+  ).then((data) => {
+    if (data) {
+      res.json({ result: true, data: data });
+    }
+  });
+});
+
+// /* remove profil */
+
+// router.delete("/removeProfil/:token", (req, res) => {
+//   const token = req.params.token;
+//   const profil = req.body.profil;
+
+//   User.updateOne({ token }, { $pull: { profil: { profil: profil } } }).then(
+//     (data) => {
+//       if (data) {
+//         res.json({ result: true, data: data });
+//       }
+//     }
+//   );
+// });
+
 module.exports = router;
