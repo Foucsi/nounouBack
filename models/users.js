@@ -1,5 +1,9 @@
 const mongoose = require("mongoose");
 
+const avisSchema = mongoose.Schema({
+  avis: String,
+});
+
 const profilSchema = mongoose.Schema({
   profil: String,
 });
@@ -10,6 +14,7 @@ const userSchema = mongoose.Schema({
   password: String,
   token: String,
   profil: [profilSchema],
+  avis: [avisSchema],
   photo: String,
   price: Number,
 });
