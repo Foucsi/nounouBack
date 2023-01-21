@@ -244,4 +244,49 @@ router.put("/addProfil/:token", (req, res) => {
 //   );
 // });
 
+/* cette route permettra de publier les avis */
+
+router.post("/addAvis/:token", (req, res) => {
+  const token = req.params.token;
+  const avis = req.body.avis;
+
+  User.findOneAndUpdate(
+    { token },
+    {
+      $push: { avis: { avis: avis } },
+    }
+  ).then((data) => {
+    if (data) {
+      res.json({ result: true, data: data });
+    }
+  });
+});
+
+/* cette route permet de recuperer tous les avis d'un users */
+
+router.get("/getAvis/:token", (req, res) => {
+  const token = req.params.token;
+  User.findOne({ token }).then((data) => {
+    const avis = data.avis;
+    if (data) {
+      res.json({ result: true, data: avis });
+    }
+  });
+});
+
+/*remove avis */
+router.put("/removeAvis/:token", (req, res) => {
+  const token = req.params.token;
+  const avis = req.body.avis;
+
+  User.findOneAndUpdate(
+    { token },
+    {
+      $pull: { avis: { avis: avis } },
+    }
+  ).then((data) => {
+    res.json({ result: true });
+  });
+});
+
 module.exports = router;
